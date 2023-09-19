@@ -17,8 +17,7 @@ const Counter = () => {
 const App = () => (
   <Suspense fallback="Loading...">
     <div className="App">
-      <h1>Hello Jotai</h1>
-      <h2>Enjoy coding!</h2>
+      <h1>Jotai Examples</h1>
       <Counter />
     </div>
   </Suspense>
