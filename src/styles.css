@@ -4,10 +4,9 @@
 }
 
 .example {
-  border-color: grey;
+  border: 1px solid gray;
   border-radius: 5px;
-  border: solid;
-  margin: auto;
+  margin: auto auto 20px auto;
   padding: 15px;
   width: 300px;
 }
