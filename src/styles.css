@@ -2,3 +2,19 @@
   font-family: sans-serif;
   text-align: center;
 }
+
+.example {
+  border-color: grey;
+  border-radius: 5px;
+  border: solid;
+  margin: auto;
+  padding: 15px;
+  width: 300px;
+}
+
+.example-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
