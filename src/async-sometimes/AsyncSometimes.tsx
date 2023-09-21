@@ -29,10 +29,12 @@ const flavorAtom = unwrap(
         flavor,
       });
     }
-  )
+  ),
+  (prev) => prev
 );
 
 const FlavorPicker = () => {
+  console.log("render FlavorPicker");
   const [flavor, setFlavor] = useAtom(flavorAtom);
 
   const onSelect = useCallback<ChangeEventHandler<HTMLSelectElement>>(
