@@ -18,13 +18,12 @@ const iceCreamAtom = atomWithDefault<Promise<IceCream> | IceCream>(
 );
 
 const flavorAtom = atom(
-  async (get) => {
-    const { flavor } = await get(iceCreamAtom);
+  (get) => {
+    const { flavor } = get(iceCreamAtom) as IceCream;
     return flavor;
   },
-  (get, set, flavor: Flavor) => {
-    const iceCream = get(iceCreamAtom) as IceCream;
-    console.log("set flavor, iceCream", iceCream);
+  async (get, set, flavor: Flavor) => {
+    const iceCream = await get(iceCreamAtom);
     set(iceCreamAtom, {
       ...iceCream,
       flavor,
