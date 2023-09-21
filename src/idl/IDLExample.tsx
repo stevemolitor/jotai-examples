@@ -70,13 +70,7 @@ export const IDLExample = () => (
   <div className="example">
     <>
       <div className="example-title">IDL Example:</div>
-      <Suspense
-        fallback={
-          <div style={{ backgroundColor: "red", fontSize: "100px" }}>
-            getting ice cream from freezer…
-          </div>
-        }
-      >
+      <Suspense fallback={<div>getting ice cream from freezer…</div>}>
         <IceCreamForm />
       </Suspense>
     </>
