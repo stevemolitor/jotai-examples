@@ -1,4 +1,4 @@
-import { atomWithDefault } from "jotai/utils";
+import { atomWithDefault, unwrap } from "jotai/utils";
 import { atom, useAtom } from "jotai";
 import { ChangeEventHandler, Suspense, useCallback } from "react";
 
@@ -10,25 +10,26 @@ interface IceCream {
 
 const iceCreamDb: IceCream = { flavor: "chocolate" };
 
-const fetchIceCream = async (): Promise<IceCream> =>
-  Promise.resolve(iceCreamDb);
+const fetchIceCream = async () => Promise.resolve(iceCreamDb);
 
 const iceCreamAtom = atomWithDefault<Promise<IceCream> | IceCream>(
   fetchIceCream
 );
 
-const flavorAtom = atom(
-  (get) => {
-    const { flavor } = get(iceCreamAtom) as IceCream;
-    return flavor;
-  },
-  async (get, set, flavor: Flavor) => {
-    const iceCream = await get(iceCreamAtom);
-    set(iceCreamAtom, {
-      ...iceCream,
-      flavor,
-    });
-  }
+const flavorAtom = unwrap(
+  atom(
+    async (get) => {
+      const { flavor } = await get(iceCreamAtom);
+      return flavor;
+    },
+    async (get, set, flavor: Flavor) => {
+      const iceCream = await get(iceCreamAtom);
+      set(iceCreamAtom, {
+        ...iceCream,
+        flavor,
+      });
+    }
+  )
 );
 
 const FlavorPicker = () => {
