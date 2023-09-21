@@ -11,7 +11,7 @@ let iceCreamDb: IDL = {
 
 export const getIceCreamData = (): Promise<IDL> =>
   new Promise((resolve) => {
-    setTimeout(() => resolve(iceCreamDb), 2000);
+    setTimeout(() => resolve(iceCreamDb), 1000);
   });
 
 export const saveIceCreamData = (iceCream: IDL): Promise<IDL> =>
@@ -22,5 +22,5 @@ export const saveIceCreamData = (iceCream: IDL): Promise<IDL> =>
         updatedAt: timestamp(),
       };
       return resolve(iceCreamDb);
-    }, 2000);
+    }, 1000);
   });

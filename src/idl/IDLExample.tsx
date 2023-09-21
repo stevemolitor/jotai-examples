@@ -1,9 +1,9 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   coneAtom,
-  iceCreamAtom,
   updatedAtAtom,
   saveIceCreamAtom,
+  isIceCreamDirtyAtom,
 } from "./state";
 import {
   ChangeEventHandler,
@@ -41,6 +41,7 @@ const ConePicker = () => {
 const IceCreamForm = () => {
   const save = useSetAtom(saveIceCreamAtom);
   const updatedAt = useAtomValue(updatedAtAtom);
+  const isDirty = useAtomValue(isIceCreamDirtyAtom);
 
   const [isPending, startTransition] = useTransition();
 
@@ -54,15 +55,13 @@ const IceCreamForm = () => {
     [save]
   );
 
-  const iceCream = useAtomValue(iceCreamAtom);
   return (
     <form onSubmit={onSave}>
-      <div>{JSON.stringify(iceCream, null, 2)}</div>
-
       <ConePicker />
       <div>updated at: {updatedAt}</div>
-      <button type="submit">Save</button>
-      {isPending && <div>saving…</div>}
+      <button type="submit" disabled={!isDirty || isPending}>
+        {isPending ? <i>saving…</i> : "Save"}
+      </button>
     </form>
   );
 };
@@ -72,7 +71,13 @@ export const IDLExample = () => {
     <div className="example">
       <>
         <div className="example-title">IDL Example:</div>
-        <Suspense fallback={<div>getting ice cream from freezer…</div>}>
+        <Suspense
+          fallback={
+            <div style={{ backgroundColor: "red", fontSize: "100px" }}>
+              getting ice cream from freezer…
+            </div>
+          }
+        >
           <IceCreamForm />
         </Suspense>
       </>
