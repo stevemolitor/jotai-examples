@@ -9,12 +9,12 @@ let iceCreamDb: IDL = {
   cone: "none",
 };
 
-export const getIceCreamData = (): Promise<IDL> =>
+export const getIceCreamData = async (): Promise<IDL> =>
   new Promise((resolve) => {
     setTimeout(() => resolve(iceCreamDb), 1000);
   });
 
-export const saveIceCreamData = (iceCream: IDL): Promise<IDL> =>
+export const saveIceCreamData = async (iceCream: IDL): Promise<IDL> =>
   new Promise((resolve) => {
     setTimeout(() => {
       iceCreamDb = {

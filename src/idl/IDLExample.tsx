@@ -66,21 +66,19 @@ const IceCreamForm = () => {
   );
 };
 
-export const IDLExample = () => {
-  return (
-    <div className="example">
-      <>
-        <div className="example-title">IDL Example:</div>
-        <Suspense
-          fallback={
-            <div style={{ backgroundColor: "red", fontSize: "100px" }}>
-              getting ice cream from freezer…
-            </div>
-          }
-        >
-          <IceCreamForm />
-        </Suspense>
-      </>
-    </div>
-  );
-};
+export const IDLExample = () => (
+  <div className="example">
+    <>
+      <div className="example-title">IDL Example:</div>
+      <Suspense
+        fallback={
+          <div style={{ backgroundColor: "red", fontSize: "100px" }}>
+            getting ice cream from freezer…
+          </div>
+        }
+      >
+        <IceCreamForm />
+      </Suspense>
+    </>
+  </div>
+);
