@@ -1,43 +1,14 @@
-import { atom } from "jotai";
-import { Cone, IDL } from "./types";
-import { getIceCreamData, saveIceCreamData } from "./iceCreamDb";
-import { isEqual } from "lodash";
-import { atomWithDefault } from "jotai/utils";
+import { atom, useAtomValue } from "jotai";
+import { Cone, IDL, Scoop } from "./types";
+import { useMemo } from "react";
 
-// latest ice cream data loaded from server
-export const iceCreamDbAtom = atomWithDefault<Promise<IDL> | IDL>(
-  getIceCreamData // initialize with promise
-);
+const DEFAULT_ICE_CREAM: IDL = {
+  scoops: [],
+  toppings: [],
+  cone: "none",
+};
 
-// in memory copy of iceCream data - this will get out of sync with iceCreamDbAtom as the user makes edits.
-export const iceCreamFormAtom = atom<Promise<IDL> | IDL | null>(null);
-
-// ice cream atom that proxies from iceCreamClientAtom and iceCreamDbAtom as appropriate.
-export const iceCreamAtom = atom(
-  (get) => get(iceCreamFormAtom) ?? get(iceCreamDbAtom),
-  (_get, set, iceCream: IDL) => {
-    set(iceCreamFormAtom, iceCream);
-  }
-);
-
-// return true if there are unsaved ice cream changes
-export const isIceCreamDirtyAtom = atom(async (get) => {
-  const iceCreamForm = await get(iceCreamFormAtom);
-  const iceCreamDb = await get(iceCreamDbAtom);
-  return iceCreamForm !== null && !isEqual(iceCreamForm, iceCreamDb);
-});
-
-export const saveIceCreamAtom = atom(null, (get, set) => {
-  const iceCream = get(iceCreamAtom);
-  const iceCreamPromise = saveIceCreamData(iceCream as IDL);
-  set(iceCreamDbAtom, iceCreamPromise);
-  set(iceCreamFormAtom, iceCreamPromise);
-});
-
-export const updatedAtAtom = atom(async (get) => {
-  const { updatedAt } = await get(iceCreamAtom);
-  return updatedAt;
-});
+export const iceCreamAtom = atom<IDL>(DEFAULT_ICE_CREAM);
 
 export const coneAtom = atom(
   (get) => {
@@ -47,9 +18,42 @@ export const coneAtom = atom(
 
   (get, set, cone: Cone) => {
     const iceCream = get(iceCreamAtom) as IDL;
-    set(iceCreamFormAtom, {
+    set(iceCreamAtom, {
       ...iceCream,
       cone,
     });
   }
 );
+
+const selectScoop = (scoopId: string) =>
+  atom((get) => {
+    const { scoops } = get(iceCreamAtom);
+    return scoops.find(({ id }) => id === scoopId);
+  });
+
+export const useScoop = (id: string) =>
+  useAtomValue(useMemo(() => selectScoop(id), [id]));
+
+export const scoopIdsAtom = atom((get) =>
+  get(iceCreamAtom).scoops.map(({ id }) => id)
+);
+
+let nextScoopNum = 0;
+const genScoopId = () => {
+  nextScoopNum += 1;
+  return `scoop-${nextScoopNum}`;
+};
+
+const newScoop = (): Scoop => ({ id: genScoopId(), flavor: "vanilla" });
+
+export const addScoopAtom = atom(null, (get, set) => {
+  console.log("add scoop!");
+  const iceCream = get(iceCreamAtom);
+  const scoops = [...iceCream.scoops, newScoop()];
+  const newIceCream = {
+    ...iceCream,
+    scoops,
+  };
+  console.log("newIceCream", newIceCream);
+  set(iceCreamAtom, newIceCream);
+});

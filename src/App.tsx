@@ -2,8 +2,9 @@ import { Suspense } from "react";
 import { ReadWriteAtomExample } from "./read-write-atom/ReadWriteAtomExample";
 import { ToggleExample } from "./toggle/ToggleExample";
 import { EncapsulatedAtomExample } from "./encapsulated-atom/EncapsulatedAtomExample";
-import { IDLExample } from "./idl/IDLExample";
+import { PersistentIDLExample } from "./persistent-idl/PesistentIDLExample";
 import { ReducerAtomExample } from "./reducer/ReducerAtomExample";
+import { IDLExample } from "./idl/IDLExample";
 
 const App = () => (
   <Suspense fallback="Loading...">
@@ -14,6 +15,7 @@ const App = () => (
       <EncapsulatedAtomExample />
       <ReducerAtomExample />
       <IDLExample />
+      <PersistentIDLExample />
     </div>
   </Suspense>
 );

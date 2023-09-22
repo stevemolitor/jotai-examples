@@ -1,20 +1,15 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
+  addScoopAtom,
   coneAtom,
-  updatedAtAtom,
-  saveIceCreamAtom,
-  isIceCreamDirtyAtom,
+  iceCreamAtom,
+  scoopIdsAtom,
+  useScoop,
 } from "./state";
-import {
-  ChangeEventHandler,
-  FormEventHandler,
-  Suspense,
-  useCallback,
-  useTransition,
-} from "react";
+import { FormEventHandler, ChangeEventHandler, FC, useCallback } from "react";
 import { Cone } from "./types";
 
-const ConePicker = () => {
+const ConePicker: FC = () => {
   const [cone, setCone] = useAtom(coneAtom);
 
   const onSelect = useCallback<ChangeEventHandler<HTMLSelectElement>>(
@@ -38,41 +33,46 @@ const ConePicker = () => {
   );
 };
 
-const IceCreamForm = () => {
-  const save = useSetAtom(saveIceCreamAtom);
-  const updatedAt = useAtomValue(updatedAtAtom);
-  const isDirty = useAtomValue(isIceCreamDirtyAtom);
-
-  const [isPending, startTransition] = useTransition();
-
-  const onSave = useCallback<FormEventHandler>(
-    (event) => {
-      event.preventDefault();
-      startTransition(() => {
-        save();
-      });
-    },
-    [save]
-  );
+const ScoopCard: FC<{ id: string }> = ({ id }) => {
+  const scoop = useScoop(id);
 
   return (
-    <form onSubmit={onSave}>
+    <div>
+      id: {id}, flavor: {scoop?.flavor}
+    </div>
+  );
+};
+
+const IceCreamForm = () => {
+  const scoopIds = useAtomValue(scoopIdsAtom);
+  const addScoop = useSetAtom(addScoopAtom);
+  const iceCream = useAtomValue(iceCreamAtom);
+  console.log("ice cream form ice cream:", iceCream);
+  const onSubmit = useCallback<FormEventHandler>((event) => {
+    event.preventDefault();
+  }, []);
+  const onAddScoop = useCallback(() => {
+    console.log("adding a scooop");
+    addScoop();
+  }, [addScoop]);
+
+  return (
+    <form onSubmit={onSubmit}>
+      <div>ice cream: {JSON.stringify(iceCream, null, 4)}</div>
       <ConePicker />
-      <div>updated at: {updatedAt}</div>
-      <button type="submit" disabled={!isDirty || isPending}>
-        {isPending ? <i>saving…</i> : "Save"}
-      </button>
+      {scoopIds.map((id) => (
+        <ScoopCard key={id} id={id} />
+      ))}
+      <button onClick={onAddScoop}>+</button>
     </form>
   );
 };
 
-export const IDLExample = () => (
+export const IDLExample: FC = () => (
   <div className="example">
     <>
       <div className="example-title">IDL Example:</div>
-      <Suspense fallback={<div>getting ice cream from freezer…</div>}>
-        <IceCreamForm />
-      </Suspense>
+      <IceCreamForm />
     </>
   </div>
 );
