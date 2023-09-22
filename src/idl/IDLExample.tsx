@@ -1,11 +1,5 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import {
-  addScoopAtom,
-  coneAtom,
-  iceCreamAtom,
-  scoopIdsAtom,
-  useScoop,
-} from "./state";
+import { addScoopAtom, coneAtom, scoopIdsAtom, useScoop } from "./state";
 import { FormEventHandler, ChangeEventHandler, FC, useCallback } from "react";
 import { Cone } from "./types";
 
@@ -37,8 +31,13 @@ const ScoopCard: FC<{ id: string }> = ({ id }) => {
   const scoop = useScoop(id);
 
   return (
-    <div>
-      id: {id}, flavor: {scoop?.flavor}
+    <div className="scoop-card">
+      <div>ID: {id}</div>
+      <div>
+        <label>
+          Flavor: <input type="text" value={scoop?.flavor} />
+        </label>
+      </div>
     </div>
   );
 };
@@ -46,24 +45,24 @@ const ScoopCard: FC<{ id: string }> = ({ id }) => {
 const IceCreamForm = () => {
   const scoopIds = useAtomValue(scoopIdsAtom);
   const addScoop = useSetAtom(addScoopAtom);
-  const iceCream = useAtomValue(iceCreamAtom);
-  console.log("ice cream form ice cream:", iceCream);
+
   const onSubmit = useCallback<FormEventHandler>((event) => {
     event.preventDefault();
   }, []);
+
   const onAddScoop = useCallback(() => {
-    console.log("adding a scooop");
     addScoop();
   }, [addScoop]);
 
   return (
-    <form onSubmit={onSubmit}>
-      <div>ice cream: {JSON.stringify(iceCream, null, 4)}</div>
+    <form className="ice-cream-form" onSubmit={onSubmit}>
       <ConePicker />
       {scoopIds.map((id) => (
         <ScoopCard key={id} id={id} />
       ))}
-      <button onClick={onAddScoop}>+</button>
+      <button className="add-scoop-btn" onClick={onAddScoop}>
+        +
+      </button>
     </form>
   );
 };

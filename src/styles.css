@@ -17,3 +17,20 @@
   margin-bottom: 10px;
 }
 
+.ice-cream-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scoop-card {
+  padding: 5px;
+  border: 1px dashed blue;
+  border-radius: 5px;
+}
+
+.add-scoop-btn {
+  width: fit-content;
+  align-self: center;
+}
+
