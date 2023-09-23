@@ -1,5 +1,5 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { FC, useCallback } from "react";
+import { FC, memo, useCallback } from "react";
 import { CONE_TYPES, Flavor, Topping } from "./idl";
 import { Picker, ScoopCard } from "./ids";
 import {
@@ -59,6 +59,8 @@ const StatefulScoopCard: FC<{ scoopId: string }> = ({ scoopId }) => {
   );
 };
 
+const MemoizedStatefulScoopCard = memo(StatefulScoopCard);
+
 const Scoops: FC = () => {
   const scoopIds = useAtomValue(scoopIdsAtom);
   const addScoop = useSetAtom(addScoopAtom);
@@ -67,7 +69,7 @@ const Scoops: FC = () => {
     <div className="scoops">
       <div>Scoops:</div>
       {scoopIds.map((id) => (
-        <StatefulScoopCard key={id} scoopId={id} />
+        <MemoizedStatefulScoopCard key={id} scoopId={id} />
       ))}
       <button className="add-scoop-btn" onClick={addScoop}>+</button>
     </div>
@@ -75,11 +77,11 @@ const Scoops: FC = () => {
 };
 
 const IceCreamForm: FC = () => (
-  <div>
-    <div className="section-title">Ice Cream Cone:</div>
-    <StatefulConePicker />
-    <Scoops />
-  </div>
+    <div>
+        <div className="section-title">Ice Cream Cone:</div>
+        <StatefulConePicker />
+        <Scoops />
+    </div>
 );
 
 const IceCreamIssues: FC = () => {
