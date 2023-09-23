@@ -1,59 +1,83 @@
 import { atom, useAtomValue } from "jotai";
-import { Cone, IDL, Scoop } from "./types";
 import { useMemo } from "react";
+import { Cone, DEFAULT_ICE_CREAM_CONE, newScoop, Flavor, Scoop, Topping } from "./idl";
+import { selectAtom } from "jotai/utils";
+import { isEqual } from "lodash";
 
-const DEFAULT_ICE_CREAM: IDL = {
-  scoops: [],
-  toppings: [],
-  cone: "none",
-};
-
-export const iceCreamAtom = atom<IDL>(DEFAULT_ICE_CREAM);
+export const iceCreamConeAtom = atom(DEFAULT_ICE_CREAM_CONE);
 
 export const coneAtom = atom(
-  (get) => {
-    const iceCream = get(iceCreamAtom) as IDL;
-    return iceCream.cone;
-  },
-
+  (get) => get(iceCreamConeAtom).cone,
   (get, set, cone: Cone) => {
-    const iceCream = get(iceCreamAtom) as IDL;
-    set(iceCreamAtom, {
-      ...iceCream,
-      cone,
-    });
+    set(iceCreamConeAtom, { ...get(iceCreamConeAtom), cone });
   }
 );
 
-const selectScoop = (scoopId: string) =>
-  atom((get) => {
-    const { scoops } = get(iceCreamAtom);
-    return scoops.find(({ id }) => id === scoopId);
-  });
-
-export const useScoop = (id: string) =>
-  useAtomValue(useMemo(() => selectScoop(id), [id]));
-
-export const scoopIdsAtom = atom((get) =>
-  get(iceCreamAtom).scoops.map(({ id }) => id)
+export const scoopIdsAtom = selectAtom(iceCreamConeAtom,
+  iceCreamCone => iceCreamCone.scoops.map(({ id }) => id),
+  isEqual,
 );
 
-let nextScoopNum = 0;
-const genScoopId = () => {
-  nextScoopNum += 1;
-  return `scoop-${nextScoopNum}`;
-};
+const findScoop = (scoops: Scoop[], scoopId: string) => scoops.find(({ id }) => id === scoopId);
 
-const newScoop = (): Scoop => ({ id: genScoopId(), flavor: "vanilla" });
+const selectScoop = (scoopId: string) =>
+ atom((get) => findScoop(get(iceCreamConeAtom).scoops, scoopId));
+
+export const useScoop = (scoopId: string) =>
+  useAtomValue(useMemo(() => selectScoop(scoopId), [scoopId]));
 
 export const addScoopAtom = atom(null, (get, set) => {
-  console.log("add scoop!");
-  const iceCream = get(iceCreamAtom);
-  const scoops = [...iceCream.scoops, newScoop()];
-  const newIceCream = {
-    ...iceCream,
-    scoops,
-  };
-  console.log("newIceCream", newIceCream);
-  set(iceCreamAtom, newIceCream);
+  const iceCreamCone = get(iceCreamConeAtom);
+  const { scoops } = iceCreamCone;
+
+  set(iceCreamConeAtom, {
+    ...iceCreamCone,
+    scoops: [...scoops, newScoop()],
+  });
 });
+
+export const updateFlavorAtom = atom(null,
+  (get, set, scoopId: string, flavor: Flavor) => {
+    const iceCreamCone = get(iceCreamConeAtom);
+    const { scoops } = iceCreamCone;
+    const pos = scoops.findIndex(({id}) => scoopId === id);
+    if (pos !== -1) {
+      const scoopToUpdate = scoops[pos];
+      const updatedScoop = {
+        ...scoopToUpdate,
+        flavor
+      };
+      const newScoops = [...scoops.slice(0, pos), updatedScoop, ...scoops.slice(pos + 1)];
+      const newIceCreamCone = {
+        ...iceCreamCone,
+        scoops: newScoops
+      }
+      set(iceCreamConeAtom, newIceCreamCone);
+    }
+  }
+)
+
+export const updateToppingAtom = atom(null,
+  (get, set, scoopId: string, topping: Topping) => {
+    const iceCreamCone = get(iceCreamConeAtom);
+    const { scoops } = iceCreamCone;
+    const pos = scoops.findIndex(({id}) => scoopId === id);
+    if (pos !== -1) {
+      const scoopToUpdate = scoops[pos];
+      const updatedScoop = {
+        ...scoopToUpdate,
+        topping,
+      };
+      const newScoops = [...scoops.slice(0, pos), updatedScoop, ...scoops.slice(pos + 1)];
+      const newIceCreamCone = {
+        ...iceCreamCone,
+        scoops: newScoops
+      }
+      set(iceCreamConeAtom, newIceCreamCone);
+    }
+  }
+)
+
+const numToppingsAtom = atom(get => get(iceCreamConeAtom).scoops.map(({topping}) => topping).filter((topping) => topping !== 'none').length);
+
+export const toppingsIssueAtom = atom(get => get(numToppingsAtom) === 0 ? 'You must pick at least one topping!' : '');
