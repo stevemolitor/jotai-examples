@@ -10,12 +10,15 @@ interface PickerProps<T extends string> {
   onSelect: (value: T) => void;
 }
 
-export const Picker = <T extends string>(
-  { label, items, value, onSelect }: PickerProps<T>
-) => {
+export const Picker = <T extends string>({
+  label,
+  items,
+  value,
+  onSelect,
+}: PickerProps<T>) => {
   const onChange = useCallback<ChangeEventHandler<HTMLSelectElement>>(
     (e) => onSelect(e.target.value as T),
-    [onSelect]
+    [onSelect],
   );
 
   return (
@@ -39,9 +42,12 @@ interface ScoopCardProps extends Scoop {
   onSelectTopping: (topping: Topping) => void;
 }
 
-export const ScoopCard: FC<ScoopCardProps> = (
-  { flavor, topping, onSelectFlavor, onSelectTopping }
-) => (
+export const ScoopCard: FC<ScoopCardProps> = ({
+  flavor,
+  topping,
+  onSelectFlavor,
+  onSelectTopping,
+}) => (
   <div className="scoop-card">
     <Picker
       label="Flavor"

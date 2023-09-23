@@ -4,9 +4,9 @@ export const CONE_TYPES = ["waffle", "sugar"] as const;
 export const FLAVORS = ["chocolate", "vanilla", "strawberry"] as const;
 export const TOPPINGS = ["sprinkles", "nuts", "skittles", "none"] as const;
 
-export type Cone = typeof CONE_TYPES[number];
-export type Flavor = typeof FLAVORS[number];
-export type Topping = typeof TOPPINGS[number];
+export type Cone = (typeof CONE_TYPES)[number];
+export type Flavor = (typeof FLAVORS)[number];
+export type Topping = (typeof TOPPINGS)[number];
 
 export const DEFAULT_CONE_TYPE: Cone = "sugar";
 export const DEFAULT_TOPPING: Topping = "none";

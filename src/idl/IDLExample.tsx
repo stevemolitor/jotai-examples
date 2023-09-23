@@ -34,14 +34,20 @@ const StatefulScoopCard: FC<{ scoopId: string }> = ({ scoopId }) => {
   const scoop = useScoop(scoopId);
   const updateFlavor = useSetAtom(updateFlavorAtom);
   const updateTopping = useSetAtom(updateToppingAtom);
-  
-  const onSelectFlavor = useCallback((flavor: Flavor) => {
-    updateFlavor(scoopId, flavor);
-  }, [scoopId, updateFlavor]);
-  
-  const onSelectTopping = useCallback((topping: Topping) => {
-    updateTopping(scoopId, topping);
-  }, [scoopId, updateTopping]);
+
+  const onSelectFlavor = useCallback(
+    (flavor: Flavor) => {
+      updateFlavor(scoopId, flavor);
+    },
+    [scoopId, updateFlavor],
+  );
+
+  const onSelectTopping = useCallback(
+    (topping: Topping) => {
+      updateTopping(scoopId, topping);
+    },
+    [scoopId, updateTopping],
+  );
 
   if (!scoop) {
     throw new Error(`No scoop with id ${scoopId}`);
@@ -71,17 +77,19 @@ const Scoops: FC = () => {
       {scoopIds.map((id) => (
         <MemoizedStatefulScoopCard key={id} scoopId={id} />
       ))}
-      <button className="add-scoop-btn" onClick={addScoop}>+</button>
+      <button className="add-scoop-btn" onClick={addScoop}>
+        +
+      </button>
     </div>
   );
 };
 
 const IceCreamForm: FC = () => (
-    <div>
-        <div className="section-title">Ice Cream Cone:</div>
-        <StatefulConePicker />
-        <Scoops />
-    </div>
+  <div>
+    <div className="section-title">Ice Cream Cone:</div>
+    <StatefulConePicker />
+    <Scoops />
+  </div>
 );
 
 const IceCreamIssues: FC = () => {
@@ -93,7 +101,7 @@ const IceCreamIssues: FC = () => {
       <div className="issues">{toppingsIssue}</div>
     </div>
   );
-}
+};
 
 export const IDLExample: FC = () => (
   <div className="example">
