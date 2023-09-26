@@ -106,7 +106,7 @@ export const ToggleExample = () => {
   );
 };
 #+end_src
-* Lesson 3 -  [[https://jotai.org/docs/utilities/resettable][Resettable]] Atoms
+* Lesson 3 - [[https://jotai.org/docs/utilities/resettable][Resettable]] Atoms
 To create an atom that is resettable to its original state:
 1. Create with ~atomWithReset~.
 2. Use ~useResetAtom~ to get a function that will reset it.
@@ -164,6 +164,53 @@ import { atomWithReset, RESET } from "jotai/utils";
 const resetAtom = atom(null, (_get, set) => {
   set(countAtom, RESET);
 });
+#+end_src
+* Lesson 4 - [[https://jotai.org/docs/utilities/reducer][atomWithReducer]]
+When you have an atom that needs to support a set of similar operations, you can encapsulate with ~atomWithReducer~:
+
+#+begin_src ts
+// state.ts
+import { atomWithReducer } from "jotai/utils";
+
+type CountAction = "increment" | "decrement" | "reset";
+
+const MIN_COUNT = 0;
+
+const countReducer = (prev: number, action: CountAction) => {
+  switch (action) {
+    case "increment":
+      return prev + 1;
+    case "decrement":
+      return Math.max(prev - 1, MIN_COUNT);
+    case "reset":
+      return MIN_COUNT;
+  }
+};
+
+export const countAtom = atomWithReducer(MIN_COUNT, countReducer);
+#+end_src
+
+#+begin_src tsx
+import { useAtom } from "jotai";
+import { countAtom } from "./state";
+
+export const CountWithReducer = () => {
+  const [count, dispatch] = useAtom(countAtom);
+
+  return (
+    <div className="example">
+      <>
+        <div className="example-title">Count with Reducer:</div>
+        <div>
+          count: {count}{" "}
+          <button onClick={() => dispatch("increment")}>increment</button>{" "}
+          <button onClick={() => dispatch("decrement")}>decrement</button>{" "}
+          <button onClick={() => dispatch("reset")}>reset</button>{" "}
+        </div>
+      </>
+    </div>
+  );
+};
 #+end_src
 * Links
 - [[https://jotai.org/][Jotai.org]]
