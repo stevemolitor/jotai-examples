@@ -212,6 +212,8 @@ export const CountWithReducer = () => {
   );
 };
 #+end_src
+* Lesson 5 - Avoid re-renders with [[https://jotai.org/docs/utilities/select][selectAtom]]
+* Lesson 6 - Simplify Updates with Immer
 * Links
 - [[https://jotai.org/][Jotai.org]]
 - [[https://tutorial.jotai.org/][Jotai Tutorial]]
