@@ -5,6 +5,7 @@ const App = () => (
   <Suspense fallback="Loading...">
     <div className="App">
       <Count />
+      <Count />
     </div>
   </Suspense>
 );
