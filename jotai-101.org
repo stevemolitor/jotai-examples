@@ -106,8 +106,65 @@ export const ToggleExample = () => {
   );
 };
 #+end_src
+* Lesson 3 -  [[https://jotai.org/docs/utilities/resettable][Resettable]] Atoms
+To create an atom that is resettable to its original state:
+1. Create with ~atomWithReset~.
+2. Use ~useResetAtom~ to get a function that will reset it.
 
-* Lesson 3
+   #+begin_src tsx
+// state.ts
+import { atom, useAtomValue, useSetAtom } from "jotai";
+import { atomWithReset, useResetAtom } from "jotai/utils";
+import { useMemo } from "react";
+
+const countAtom = atomWithReset(0);
+
+const incrementAtom = atom(null, (get, set) =>
+  set(countAtom, get(countAtom) + 1),
+);
+
+export const useCount = () => {
+  const count = useAtomValue(countAtom);
+  const increment = useSetAtom(incrementAtom);
+  const reset = useResetAtom(countAtom);
+
+  return useMemo(
+    () => ({ increment, reset, count }),
+    [count, increment, reset],
+  );
+};
+      #+end_src
+
+#+begin_src tsx
+import { useCount } from "./state";
+
+export const CountWithReset = () => {
+  const { count, increment, reset } = useCount();
+
+  return (
+    <div className="example">
+      <>
+        <div className="example-title">Count with Reset:</div>
+        <div>
+          count: {count} <button onClick={increment}>increment</button>{" "}
+          <button onClick={reset}>reset</button>
+        </div>
+      </>
+    </div>
+  );
+};
+#+end_src
+
+In place of ~useResetAtom~ you can instead use the special ~RESET~ value in an atom setter. This is useful when delegating to another atom, or when conditionally resetting:
+
+#+begin_src ts
+import { atom } from "jotai";
+import { atomWithReset, RESET } from "jotai/utils";
+
+const resetAtom = atom(null, (_get, set) => {
+  set(countAtom, RESET);
+});
+#+end_src
 * Links
 - [[https://jotai.org/][Jotai.org]]
 - [[https://tutorial.jotai.org/][Jotai Tutorial]]
