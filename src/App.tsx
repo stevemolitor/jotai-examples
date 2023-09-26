@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Count } from "./count/Count";
+import { CountWithReset } from "./reset/CountWithReset";
 import { Toggle } from "./toggle/Toggle";
 
 const App = () => (
@@ -7,6 +8,7 @@ const App = () => (
     <div className="App">
       <Count />
       <Toggle />
+      <CountWithReset />
     </div>
   </Suspense>
 );
