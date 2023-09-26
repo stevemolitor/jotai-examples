@@ -1,12 +1,13 @@
 #+TITLE:Jotai 101
-* Jotai 101
-** What is Jotai?
+
+* What is Jotai?
 - atomic state management solution
 - Build state by combining atoms
 - Renders are optimized based on atom dependency
 - Solves the extra re-render issue of React context
 - Eliminates the need for memoization in most cases
 - Declarative programming model
+* Lesson 1 - Atoms
 ** What is an Atom?
 - A value in a Jotai [[https://jotai.org/docs/core/store][Store]]
 ** What is an Atom Config?
@@ -21,7 +22,7 @@
       - Either function can be ~null~
             - An atom with only a ~get~ function is a read-only atom
             - An atom with only a ~set~ function is a write-only atom
-*** Example Atom Configs
+** Example Atom Configs
 #+begin_src ts
 import { atom } from 'jotai'
 
@@ -36,11 +37,11 @@ const setCountWithLoggingAtom = atom(null, (get, set, newCount: number) => {
   set(countAtom, newCount);
 });
 #+end_src
-*** How Do I Use an Atom?
+** How Do I Use an Atom?
 - [[https://jotai.org/docs/core/use-atom][useAtom]] - return tuple of atom value, atom setter, like ~useState~
 - ~useAtomValue~ - read an atom value
 - ~useSetAtom~ - set an atom value
-*** Using Atoms Examples
+** Using Atoms Examples
 #+begin_src tsx
 export const Count: FC = () => {
   const [count, setCount] = useAtom(countAtom);
@@ -69,8 +70,44 @@ export const Count: FC = () => {
   );
 };
 #+end_src
+* Lesson 2 - Toggle Example
+This example shows how we can encapsulate state using a proxy atom. Also see https://twitter.com/dai_shi/status/1699970779373592963. 
+
+#+begin_src ts
+// state.ts
+import { atom } from "jotai";
+
+// do not export this atom:
+const baseAtom = atom(false);
+
+// do export this atom:
+export const toggleAtom = atom(
+  (get) => get(baseAtom),
+  (get, set) => set(baseAtom, !get(baseAtom))
+);
+#+end_src
+
+#+begin_src tsx
+import { toggleAtom } from "./state";
+import { useAtom } from "jotai";
+
+export const ToggleExample = () => {
+  const [isOn, toggle] = useAtom(toggleAtom);
+
+  return (
+    <div className="example">
+      <>
+        <div className="example-title">Toggle Atom Example:</div>
+        <div>
+          state: {isOn ? "on" : "off"} <button onClick={toggle}>Toggle</button>
+        </div>
+      </>
+    </div>
+  );
+};
+#+end_src
+
+* Lesson 3
 * Links
 - [[https://jotai.org/][Jotai.org]]
 - [[https://tutorial.jotai.org/][Jotai Tutorial]]
-
-  
