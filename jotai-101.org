@@ -8,6 +8,9 @@
 - Eliminates the need for memoization in most cases
 - Declarative programming model
 * Lesson 1 - Atoms
+** Code Sandboxes
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-1-start][Lesson 1 Start]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-1-complete][Lesson 1 Complete]]
 ** What is an Atom?
 - A value in a Jotai [[https://jotai.org/docs/core/store][Store]]
 ** What is an Atom Config?
@@ -71,6 +74,8 @@ export const Count: FC = () => {
 };
 #+end_src
 * Lesson 2 - Toggle Example
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-2][CodeSandbox]]
+  
 This example shows how we can encapsulate state using a proxy atom. Also see https://twitter.com/dai_shi/status/1699970779373592963. 
 
 #+begin_src ts
@@ -107,9 +112,11 @@ export const ToggleExample = () => {
 };
 #+end_src
 * Lesson 3 - [[https://jotai.org/docs/utilities/resettable][Resettable]] Atoms
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-3][CodeSandbox]]
+
 To create an atom that is resettable to its original state:
-1. Create with ~atomWithReset~.
-2. Use ~useResetAtom~ to get a function that will reset it.
+
+Create with ~atomWithReset~:
 
    #+begin_src tsx
 // state.ts
@@ -135,6 +142,8 @@ export const useCount = () => {
 };
       #+end_src
 
+Use ~useResetAtom~ to get a function that will reset it:
+   
 #+begin_src tsx
 import { useCount } from "./state";
 
@@ -166,6 +175,8 @@ const resetAtom = atom(null, (_get, set) => {
 });
 #+end_src
 * Lesson 4 - [[https://jotai.org/docs/utilities/reducer][atomWithReducer]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-4][CodeSandbox]]
+  
 When you have an atom that needs to support a set of similar operations, you can encapsulate with ~atomWithReducer~:
 
 #+begin_src ts
@@ -213,7 +224,60 @@ export const CountWithReducer = () => {
 };
 #+end_src
 * Lesson 5 - Avoid re-renders with [[https://jotai.org/docs/utilities/select][selectAtom]]
-* Lesson 6 - Simplify Updates with Immer
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-5][CodeSandbox]]
+
+  By default Jotai uses reference equality to determine when to rerun dependent atoms. This can sometimes cause extra renders when an atom returns a new object that is equivalent to the previous value. To fix we can use ~selectAtom~ with a equality function.
+
+  When two primitive atoms depend on each other, the second will only recalculate when the first changes. Is this example ~sizeAtom~ will only recompute when ~isSmallAtom~'s value goes above or bellow the =3= threshold:
+
+  #+begin_src ts
+const isSmallAtom = atom((get) => get(countAtom) < 3);
+
+export const sizeAtom = atom((get) => get(isSmallAtom) ? "small" : "large");
+  #+end_src
+
+So far so good. But if ~isSmallAtom~ returns a new object every time, then ~sizeAtom~ will recalculate every time and cause unnecessary renders:
+
+#+begin_src ts
+const isSmallAtom = atom((get) => {
+  const isSmall = get(countAtom) < 3;
+  return { isSmall };
+});
+
+export const sizeAtom = atom((get) => {
+  const { isSmall } = get(isSmallAtom);
+  return isSmall ? "small" : "large";
+});
+#+end_src
+
+To fix, we can use ~selectAtom~ with a deep equality function:
+
+#+begin_src ts
+import { isEqual } from 'lodash';
+
+const isSmallAtom = selectAtom(
+  countAtom,
+  (count) => {
+    const isSmall = count < 3;
+    return { isSmall };
+  },
+  isEqual,
+);
+#+end_src
+
+This will stabilize ~isSmallAtom~, and then dependent ~sizeAtom~ will only recalculate when the value of the ~{ isSmall: true|false }~ object changes.
+
+Note that the ~isEqual~ function is necessary. Without it Jotai will use reference equality checks and the behavior won't change.
+
+You can pass any equality function you like. In some cases only checking top level properties might be more efficient.
+* Sandboxes
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-1-start][Lesson 1 Start]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-1-complete][Lesson 1 Complete]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-2][Lesson 2]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-3][Lesson 3]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-4][Lesson 4]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-5][Lesson 5]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-6-complete][Lesson 6]] (WIP)
 * Links
 - [[https://jotai.org/][Jotai.org]]
 - [[https://tutorial.jotai.org/][Jotai Tutorial]]
