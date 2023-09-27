@@ -1,17 +1,18 @@
 import { Suspense } from "react";
-import { IDLExample } from "./idl/IDLExample";
-import { ReadWriteAtomExample } from "./read-write-atom/ReadWriteAtomExample";
+import { Count } from "./count/Count";
+import { IceCreamEditor } from "./idl/IceCreamEditor";
+import { CountWithReducer } from "./reducer/CountWithReducer";
+import { CountWithReset } from "./reset/CountWithReset";
+import { Toggle } from "./toggle/Toggle";
 
 const App = () => (
   <Suspense fallback="Loading...">
     <div className="App">
-      <h1>Jotai Examples</h1>
-      <ReadWriteAtomExample />
-      {/*<ToggleExample />
-      <EncapsulatedAtomExample />
-      <ReducerAtomExample />*/}
-      <IDLExample />
-      {/*<PersistentIDLExample />*/}
+      <Count />
+      <Toggle />
+      <CountWithReset />
+      <CountWithReducer />
+      <IceCreamEditor />
     </div>
   </Suspense>
 );

@@ -65,7 +65,7 @@ const StatefulScoopCard: FC<{ scoopId: string }> = ({ scoopId }) => {
   );
 };
 
-const MemoizedStatefulScoopCard = memo(StatefulScoopCard);
+const MemoizedScoopCard = memo(StatefulScoopCard);
 
 const Scoops: FC = () => {
   const scoopIds = useAtomValue(scoopIdsAtom);
@@ -75,7 +75,7 @@ const Scoops: FC = () => {
     <div className="scoops">
       <div>Scoops:</div>
       {scoopIds.map((id) => (
-        <MemoizedStatefulScoopCard key={id} scoopId={id} />
+        <MemoizedScoopCard key={id} scoopId={id} />
       ))}
       <button className="add-scoop-btn" onClick={addScoop}>
         +
@@ -103,7 +103,7 @@ const IceCreamIssues: FC = () => {
   );
 };
 
-export const IDLExample: FC = () => (
+export const IceCreamEditor: FC = () => (
   <div className="example">
     <div className="example-title">Ice Cream Cone Editor</div>
     <IceCreamInspector />

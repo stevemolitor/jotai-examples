@@ -5,12 +5,8 @@ import { useMemo } from "react";
 const countAtom = atomWithReset(0);
 
 const incrementAtom = atom(null, (get, set) =>
-  set(countAtom, get(countAtom) + 1)
+  set(countAtom, get(countAtom) + 1),
 );
-
-const decrementAtom = atom(null, (get, set) => {
-  set(countAtom, Math.max(get(countAtom) - 1, 0));
-});
 
 // another way to reset - more useful when delegating to another atom,
 // or when conditionally resetting
@@ -21,11 +17,10 @@ const decrementAtom = atom(null, (get, set) => {
 export const useCount = () => {
   const count = useAtomValue(countAtom);
   const increment = useSetAtom(incrementAtom);
-  const decrement = useSetAtom(decrementAtom);
   const reset = useResetAtom(countAtom);
 
   return useMemo(
-    () => ({ increment, decrement, reset, count }),
-    [count, increment, decrement, reset]
+    () => ({ increment, reset, count }),
+    [count, increment, reset],
   );
 };

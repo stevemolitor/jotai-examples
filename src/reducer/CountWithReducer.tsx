@@ -1,13 +1,13 @@
 import { useAtom } from "jotai";
 import { countAtom } from "./state";
 
-export const ReducerAtomExample = () => {
+export const CountWithReducer = () => {
   const [count, dispatch] = useAtom(countAtom);
 
   return (
     <div className="example">
       <>
-        <div className="example-title">Reducer Atom Example:</div>
+        <div className="example-title">Count with Reducer:</div>
         <div>
           count: {count}{" "}
           <button onClick={() => dispatch("increment")}>increment</button>{" "}

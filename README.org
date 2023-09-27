@@ -1,0 +1,283 @@
+#+TITLE:Jotai 101
+
+* What is Jotai?
+- atomic state management solution
+- Build state by combining atoms
+- Renders are optimized based on atom dependency
+- Solves the extra re-render issue of React context
+- Eliminates the need for memoization in most cases
+- Declarative programming model
+* Lesson 1 - Atoms
+** Code Sandboxes
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-1-start][Lesson 1 Start]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-1-complete][Lesson 1 Complete]]
+** What is an Atom?
+- A value in a Jotai [[https://jotai.org/docs/core/store][Store]]
+** What is an Atom Config?
+- A definition of an atom
+- Immutable
+- Does not yet contain a value
+- Created by the ~atom~ function
+- The ~atom~ function can take:
+      - a default value, /or/
+      - a ~get~ and a ~set~ functions
+      - The first is just sugar over the second, so atoms are a pair of functions, get and set
+      - Either function can be ~null~
+            - An atom with only a ~get~ function is a read-only atom
+            - An atom with only a ~set~ function is a write-only atom
+** Example Atom Configs
+#+begin_src ts
+import { atom } from 'jotai'
+
+// read / write atom config, intialize atoms with a default value:
+const countAtom = atom(0);
+
+// read-only atom, aka "selector":
+const doubleCountAtom = atom((get) => get(countAtom) * 2);
+
+const setCountWithLoggingAtom = atom(null, (get, set, newCount: number) => {
+  console.log("old count:", get(countAtom), "new count", newCount);
+  set(countAtom, newCount);
+});
+#+end_src
+** How Do I Use an Atom?
+- [[https://jotai.org/docs/core/use-atom][useAtom]] - return tuple of atom value, atom setter, like ~useState~
+- ~useAtomValue~ - read an atom value
+- ~useSetAtom~ - set an atom value
+** Using Atoms Examples
+#+begin_src tsx
+export const Count: FC = () => {
+  const [count, setCount] = useAtom(countAtom);
+  const doubleCount = useAtomValue(doubleCountAtom);
+  const setCountWithLogging = useSetAtom(setCountWithLoggingAtom);
+
+  const increment = useCallback(() => {
+    setCount(count + 1);
+  }, [count, setCount]);
+
+  const incrementWithLogging = useCallback(() => {
+    setCountWithLogging(count + 1);
+  }, [count, setCountWithLogging]);
+
+  return (
+    <div className="example">
+      <>
+        <div className="example-title">Count:</div>
+        <div>
+          Count: {count} <button onClick={increment}>+</button>
+        </div>
+        <button onClick={incrementWithLogging}>+ with logging</button>
+        <div>Times two: {doubleCount}</div>
+      </>
+    </div>
+  );
+};
+#+end_src
+* Lesson 2 - Toggle Example
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-2][CodeSandbox]]
+  
+This example shows how we can encapsulate state using a proxy atom. Also see https://twitter.com/dai_shi/status/1699970779373592963. 
+
+#+begin_src ts
+// state.ts
+import { atom } from "jotai";
+
+// do not export this atom:
+const baseAtom = atom(false);
+
+// do export this atom:
+export const toggleAtom = atom(
+  (get) => get(baseAtom),
+  (get, set) => set(baseAtom, !get(baseAtom))
+);
+#+end_src
+
+#+begin_src tsx
+import { toggleAtom } from "./state";
+import { useAtom } from "jotai";
+
+export const ToggleExample = () => {
+  const [isOn, toggle] = useAtom(toggleAtom);
+
+  return (
+    <div className="example">
+      <>
+        <div className="example-title">Toggle Atom Example:</div>
+        <div>
+          state: {isOn ? "on" : "off"} <button onClick={toggle}>Toggle</button>
+        </div>
+      </>
+    </div>
+  );
+};
+#+end_src
+* Lesson 3 - [[https://jotai.org/docs/utilities/resettable][Resettable]] Atoms
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-3][CodeSandbox]]
+
+To create an atom that is resettable to its original state:
+
+Create with ~atomWithReset~:
+
+   #+begin_src tsx
+// state.ts
+import { atom, useAtomValue, useSetAtom } from "jotai";
+import { atomWithReset, useResetAtom } from "jotai/utils";
+import { useMemo } from "react";
+
+const countAtom = atomWithReset(0);
+
+const incrementAtom = atom(null, (get, set) =>
+  set(countAtom, get(countAtom) + 1),
+);
+
+export const useCount = () => {
+  const count = useAtomValue(countAtom);
+  const increment = useSetAtom(incrementAtom);
+  const reset = useResetAtom(countAtom);
+
+  return useMemo(
+    () => ({ increment, reset, count }),
+    [count, increment, reset],
+  );
+};
+      #+end_src
+
+Use ~useResetAtom~ to get a function that will reset it:
+   
+#+begin_src tsx
+import { useCount } from "./state";
+
+export const CountWithReset = () => {
+  const { count, increment, reset } = useCount();
+
+  return (
+    <div className="example">
+      <>
+        <div className="example-title">Count with Reset:</div>
+        <div>
+          count: {count} <button onClick={increment}>increment</button>{" "}
+          <button onClick={reset}>reset</button>
+        </div>
+      </>
+    </div>
+  );
+};
+#+end_src
+
+In place of ~useResetAtom~ you can instead use the special ~RESET~ value in an atom setter. This is useful when delegating to another atom, or when conditionally resetting:
+
+#+begin_src ts
+import { atom } from "jotai";
+import { atomWithReset, RESET } from "jotai/utils";
+
+const resetAtom = atom(null, (_get, set) => {
+  set(countAtom, RESET);
+});
+#+end_src
+* Lesson 4 - [[https://jotai.org/docs/utilities/reducer][atomWithReducer]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-4][CodeSandbox]]
+  
+When you have an atom that needs to support a set of similar operations, you can encapsulate with ~atomWithReducer~:
+
+#+begin_src ts
+// state.ts
+import { atomWithReducer } from "jotai/utils";
+
+type CountAction = "increment" | "decrement" | "reset";
+
+const MIN_COUNT = 0;
+
+const countReducer = (prev: number, action: CountAction) => {
+  switch (action) {
+    case "increment":
+      return prev + 1;
+    case "decrement":
+      return Math.max(prev - 1, MIN_COUNT);
+    case "reset":
+      return MIN_COUNT;
+  }
+};
+
+export const countAtom = atomWithReducer(MIN_COUNT, countReducer);
+#+end_src
+
+#+begin_src tsx
+import { useAtom } from "jotai";
+import { countAtom } from "./state";
+
+export const CountWithReducer = () => {
+  const [count, dispatch] = useAtom(countAtom);
+
+  return (
+    <div className="example">
+      <>
+        <div className="example-title">Count with Reducer:</div>
+        <div>
+          count: {count}{" "}
+          <button onClick={() => dispatch("increment")}>increment</button>{" "}
+          <button onClick={() => dispatch("decrement")}>decrement</button>{" "}
+          <button onClick={() => dispatch("reset")}>reset</button>{" "}
+        </div>
+      </>
+    </div>
+  );
+};
+#+end_src
+* Lesson 5 - Avoid re-renders with [[https://jotai.org/docs/utilities/select][selectAtom]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-5][CodeSandbox]]
+
+  By default Jotai uses reference equality to determine when to rerun dependent atoms. This can sometimes cause extra renders when an atom returns a new object that is equivalent to the previous value. To fix we can use ~selectAtom~ with a equality function.
+
+  When two primitive atoms depend on each other, the second will only recalculate when the first changes. Is this example ~sizeAtom~ will only recompute when ~isSmallAtom~'s value goes above or bellow the =3= threshold:
+
+  #+begin_src ts
+const isSmallAtom = atom((get) => get(countAtom) < 3);
+
+export const sizeAtom = atom((get) => get(isSmallAtom) ? "small" : "large");
+  #+end_src
+
+So far so good. But if ~isSmallAtom~ returns a new object every time, then ~sizeAtom~ will recalculate every time and cause unnecessary renders:
+
+#+begin_src ts
+const isSmallAtom = atom((get) => {
+  const isSmall = get(countAtom) < 3;
+  return { isSmall };
+});
+
+export const sizeAtom = atom((get) => {
+  const { isSmall } = get(isSmallAtom);
+  return isSmall ? "small" : "large";
+});
+#+end_src
+
+To fix, we can use ~selectAtom~ with a deep equality function:
+
+#+begin_src ts
+import { isEqual } from 'lodash';
+
+const isSmallAtom = selectAtom(
+  countAtom,
+  (count) => {
+    const isSmall = count < 3;
+    return { isSmall };
+  },
+  isEqual,
+);
+#+end_src
+
+This will stabilize ~isSmallAtom~, and then dependent ~sizeAtom~ will only recalculate when the value of the ~{ isSmall: true|false }~ object changes.
+
+Note that the ~isEqual~ function is necessary. Without it Jotai will use reference equality checks and the behavior won't change.
+
+You can pass any equality function you like. In some cases only checking top level properties might be more efficient.
+* Sandboxes
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-1-start][Lesson 1 Start]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-1-complete][Lesson 1 Complete]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-2][Lesson 2]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-3][Lesson 3]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-4][Lesson 4]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-5][Lesson 5]]
+- [[https://codesandbox.io/s/github/stevemolitor/jotai-examples/tree/lesson-6-complete][Lesson 6]] (WIP)
+* Links
+- [[https://jotai.org/][Jotai.org]]
+- [[https://tutorial.jotai.org/][Jotai Tutorial]]
