@@ -1,8 +1,10 @@
-import { useAtom } from "jotai";
-import { countAtom } from "./state";
+import { useAtom, useAtomValue } from "jotai";
+import { FC } from "react";
+import { countAtom, sizeAtom } from "./state";
 
-export const CountWithReducer = () => {
+export const CountWithReducer: FC = () => {
   const [count, dispatch] = useAtom(countAtom);
+  const size = useAtomValue(sizeAtom);
 
   return (
     <div className="example">
@@ -14,6 +16,7 @@ export const CountWithReducer = () => {
           <button onClick={() => dispatch("decrement")}>decrement</button>{" "}
           <button onClick={() => dispatch("reset")}>reset</button>{" "}
         </div>
+        <div>size: {size}</div>
       </>
     </div>
   );

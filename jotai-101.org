@@ -212,6 +212,48 @@ export const CountWithReducer = () => {
   );
 };
 #+end_src
+* Lesson 5 - Avoid re-renders with [[https://jotai.org/docs/utilities/select][selectAtom]]
+By default Jotai uses memoizes via reference equality. That's a problem when an atom returns an object. You can stabilize with ~selectAtom~ and an equality function
+
+For example, given this atom definition:
+
+#+begin_src ts
+const countAtom = atom(0);
+
+const isSmallAtom = atom((get) => {
+  const isSmall = get(countAtom) < 3;
+  return { isSmall }; // return a new object every time
+});
+#+end_src
+
+This derived atom will re-calculate every time:
+
+#+begin_src ts
+export const sizeAtom = atom((get) => {
+  console.log("sizeAtom");
+  const { isSmall } = get(isSmallAtom);
+  return isSmall ? "small" : "large";
+});
+#+end_src
+
+We can fix that with ~selectAtom~ and a custom equality function:
+
+#+begin_src ts
+import { selectAtom } from "jotai/utils";
+import { isEqual } from "lodash";
+
+const isSmallAtom = selectAtom(
+  countAtom,
+  (count) => {
+    console.log("isSmallAtom");
+    const isSmall = count < 3;
+    return { isSmall };
+  },
+  isEqual,
+);
+#+end_src
+
+In this case it's overkill, but it can matter more realistic scenarios.
 * Links
 - [[https://jotai.org/][Jotai.org]]
 - [[https://tutorial.jotai.org/][Jotai Tutorial]]
