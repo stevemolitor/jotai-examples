@@ -1,5 +1,5 @@
 import { atom } from "jotai";
-import { fetchAccount } from "./accountsDb";
+import { fetchAccount, saveAccount } from "./accountsDb";
 import { Account, AccountName, AccountPreferences } from "./types";
 import { isPromise } from "./utils";
 
@@ -17,6 +17,12 @@ export const accountAtom = atom(
     set(dbAccountAtom, account);
   },
 );
+
+export const saveAccountAtom = atom(null, async (get, set) => {
+  const account = await get(accountAtom);
+  const updatedAccount = await saveAccount(account);
+  set(dbAccountAtom, updatedAccount);
+});
 
 export const accountNameAtom = atom(
   async (get) => {
