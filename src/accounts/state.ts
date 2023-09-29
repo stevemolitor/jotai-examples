@@ -19,7 +19,6 @@ export const accountAtom = atom(
 );
 
 export const saveAccountAtom = atom(null, async (get, set) => {
-  console.log("saveAccountAtom");
   const account = await get(accountAtom);
   const updatedAccount = await saveAccount(account);
   set(dbAccountAtom, updatedAccount);
