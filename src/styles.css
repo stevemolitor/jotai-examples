@@ -17,6 +17,10 @@
   margin-bottom: 10px;
 }
 
+legend {
+  font-weight: 600;
+}
+
 .inspector {
   border: 1px dashed #ccc;
   border-radius: 5px;

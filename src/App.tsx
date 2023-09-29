@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { Account } from "./accounts/Account";
 import { Count } from "./count/Count";
 import { IceCreamEditor } from "./idl/IceCreamEditor";
 import { CountWithReducer } from "./reducer/CountWithReducer";
@@ -13,6 +14,7 @@ const App = () => (
       <CountWithReset />
       <CountWithReducer />
       <IceCreamEditor />
+      <Account />
     </div>
   </Suspense>
 );
