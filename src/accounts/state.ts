@@ -49,3 +49,8 @@ export const accountPreferencesAtom = atom(
     });
   },
 );
+
+export const timestampAtom = atom(async (get) => {
+  const { timestamp } = await get(accountAtom);
+  return timestamp;
+});

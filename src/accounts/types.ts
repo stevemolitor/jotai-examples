@@ -11,4 +11,5 @@ export interface AccountPreferences {
 export interface Account {
   name: AccountName;
   preferences: AccountPreferences;
+  timestamp: number;
 }

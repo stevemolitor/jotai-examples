@@ -9,6 +9,7 @@ export const defaultAccount: Account = {
     moarButtons: false,
     sendSpam: true,
   },
+  timestamp: Date.now(),
 };
 
 let account: Account = defaultAccount;
@@ -24,7 +25,7 @@ export const fetchAccount = async () => {
 export const saveAccount = async (newAccount: Account) =>
   new Promise<Account>((resolve) => {
     setTimeout(() => {
-      account = newAccount;
+      account = { ...newAccount, timestamp: Date.now() };
       resolve(account);
-    }, 2000);
+    }, 1000);
   });
