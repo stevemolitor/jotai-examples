@@ -13,12 +13,13 @@ export const defaultAccount: Account = {
 
 let account: Account = defaultAccount;
 
-export const fetchAccount = async () =>
-  new Promise<Account>((resolve) =>
+export const fetchAccount = async () => {
+  return new Promise<Account>((resolve) =>
     setTimeout(() => {
       return resolve(account);
     }, 2000),
   );
+};
 
 export const saveAccount = async (newAccount: Account) =>
   new Promise<Account>((resolve) => {

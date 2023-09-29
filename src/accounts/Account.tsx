@@ -5,13 +5,15 @@ import { EditAccountPreferences } from "./EditAccountProfile";
 import { saveAccountAtom } from "./state";
 
 export const Account: FC = () => {
-  const saveAccount = useSetAtom(saveAccountAtom);
   const [isSaving, startTransition] = useTransition();
+  const saveAccount = useSetAtom(saveAccountAtom);
 
   const onSubmit = useCallback<FormEventHandler>(
     (event) => {
       event.preventDefault();
-      saveAccount();
+      startTransition(() => {
+        saveAccount();
+      });
     },
     [saveAccount],
   );
@@ -22,8 +24,8 @@ export const Account: FC = () => {
       <form onSubmit={onSubmit}>
         <EditAccountName />
         <EditAccountPreferences />
-        <button type="submit" onSubmit={onSubmit}>
-          Save
+        <button disabled={isSaving} type="submit">
+          {isSaving ? <i>Saving…</i> : "Save"}
         </button>
       </form>
     </div>
