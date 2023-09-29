@@ -8,7 +8,6 @@ export const EditAccountName: FC = () => {
   const onChangeFirstName = useCallback<ChangeEventHandler<HTMLInputElement>>(
     (event) => {
       const fname = event.target.value;
-      console.log("fname", fname);
       setAccountName({ ...accountName, fname });
     },
     [accountName, setAccountName],
