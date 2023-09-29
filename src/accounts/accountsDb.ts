@@ -20,11 +20,11 @@ export const fetchAccount = async () =>
     }, 2000),
   );
 
-export const saveAccount = async (newAccount: Account) => {
-  new Promise((resolve) => {
+export const saveAccount = async (newAccount: Account) =>
+  new Promise<Account>((resolve) => {
     setTimeout(() => {
       account = newAccount;
+      console.log("saved account");
       resolve(account);
     }, 2000);
   });
-};
