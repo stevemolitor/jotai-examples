@@ -6,51 +6,54 @@ import { isPromise } from "./utils";
 
 const dbAccountAtom = atomWithDefault<Promise<Account> | Account>(fetchAccount);
 
-export const accountAtom = atom(
-  async (get) => {
-    const dbAccount = get(dbAccountAtom);
-    if (isPromise<Account>(dbAccount)) {
-      return await dbAccount;
-    }
-    return dbAccount;
-  },
-  (_get, set, account: Account) => {
-    set(dbAccountAtom, account);
-  },
-);
-
-export const saveAccountAtom = atom(null, async (get, set) => {
-  const account = await get(accountAtom);
-  set(dbAccountAtom, saveAccount(account));
+export const saveAccountAtom = atom(null, (get, set) => {
+  const dbAccount = get(dbAccountAtom);
+  if (isPromise<Account>(dbAccount)) {
+    set(
+      dbAccountAtom,
+      dbAccount.then((account) => saveAccount(account)),
+    );
+  } else {
+    set(dbAccountAtom, saveAccount(dbAccount));
+  }
 });
 
 export const accountNameAtom = atom(
-  async (get) => {
-    const { name } = await get(accountAtom);
-    return name;
+  (get) => {
+    const dbAccount = get(dbAccountAtom);
+    if (isPromise<Account>(dbAccount)) {
+      return dbAccount.then(({ name }) => name);
+    }
+    return dbAccount.name;
   },
   async (get, set, name: AccountName) => {
-    set(accountAtom, {
-      ...(await get(accountAtom)),
+    set(dbAccountAtom, {
+      ...(await get(dbAccountAtom)),
       name,
     });
   },
 );
 
 export const accountPreferencesAtom = atom(
-  async (get) => {
-    const { preferences } = await get(accountAtom);
-    return preferences;
+  (get) => {
+    const dbAccount = get(dbAccountAtom);
+    if (isPromise<Account>(dbAccount)) {
+      return dbAccount.then(({ preferences }) => preferences);
+    }
+    return dbAccount.preferences;
   },
   async (get, set, preferences: AccountPreferences) => {
-    set(accountAtom, {
-      ...(await get(accountAtom)),
+    set(dbAccountAtom, {
+      ...(await get(dbAccountAtom)),
       preferences,
     });
   },
 );
 
-export const timestampAtom = atom(async (get) => {
-  const { timestamp } = await get(accountAtom);
-  return timestamp;
+export const timestampAtom = atom((get) => {
+  const dbAccount = get(dbAccountAtom);
+  if (isPromise<Account>(dbAccount)) {
+    return dbAccount.then(({ timestamp }) => timestamp);
+  }
+  return dbAccount.timestamp;
 });
