@@ -14,14 +14,14 @@ export const accountAtom = atom(
     }
     return dbAccount;
   },
-  async (_get, set, account: Account) => {
+  (_get, set, account: Account) => {
     set(dbAccountAtom, account);
   },
 );
 
-export const saveAccountAtom = atom(null, (get, set) => {
-  const promise = get(accountAtom).then((account) => saveAccount(account));
-  set(dbAccountAtom, promise);
+export const saveAccountAtom = atom(null, async (get, set) => {
+  const account = await get(accountAtom);
+  set(dbAccountAtom, saveAccount(account));
 });
 
 export const accountNameAtom = atom(
