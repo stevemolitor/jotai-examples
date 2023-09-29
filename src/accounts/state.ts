@@ -1,27 +1,44 @@
 import { atom } from "jotai";
-import { defaultAccount, fetchAccount } from "./accountsDb";
-import { AccountName, AccountPreferences } from "./types";
+import { fetchAccount } from "./accountsDb";
+import { Account, AccountName, AccountPreferences } from "./types";
+import { isPromise } from "./utils";
 
-export const accountAtom = atom(defaultAccount);
+const dbAccountAtom = atom<Promise<Account> | Account>(fetchAccount());
 
-export const loadAccountAtom = atom(fetchAccount());
-// export const loadAccountAtom = atom(() => fetchAccount());
+export const accountAtom = atom(
+  async (get) => {
+    const dbAccount = get(dbAccountAtom);
+    if (isPromise<Account>(dbAccount)) {
+      return await dbAccount;
+    }
+    return dbAccount;
+  },
+  async (_get, set, account: Account) => {
+    set(dbAccountAtom, account);
+  },
+);
 
 export const accountNameAtom = atom(
-  (get) => get(accountAtom).name,
-  (get, set, name: AccountName) => {
+  async (get) => {
+    const { name } = await get(accountAtom);
+    return name;
+  },
+  async (get, set, name: AccountName) => {
     set(accountAtom, {
-      ...get(accountAtom),
+      ...(await get(accountAtom)),
       name,
     });
   },
 );
 
 export const accountPreferencesAtom = atom(
-  (get) => get(accountAtom).preferences,
-  (_get, set, preferences: AccountPreferences) => {
+  async (get) => {
+    const { preferences } = await get(accountAtom);
+    return preferences;
+  },
+  async (get, set, preferences: AccountPreferences) => {
     set(accountAtom, {
-      ..._get(accountAtom),
+      ...(await get(accountAtom)),
       preferences,
     });
   },
