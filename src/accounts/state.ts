@@ -1,34 +1,26 @@
 import { atom } from "jotai";
-import { atomWithDefault } from "jotai/utils";
-import { fetchAccount, saveAccount } from "./accountsDb";
+import { atomWithDefault, unwrap } from "jotai/utils";
+import { isEqual } from "lodash";
+import { defaultAccount, fetchAccount, saveAccount } from "./accountsDb";
 import { Account, AccountName, AccountPreferences } from "./types";
-import { isPromise } from "./utils";
 
-const dbAccountAtom = atomWithDefault<Promise<Account> | Account>(fetchAccount);
+export const dbAccountAtom = atomWithDefault<Promise<Account>>(fetchAccount);
+
+export const accountAtom = atom(defaultAccount);
 
 export const saveAccountAtom = atom(null, (get, set) => {
-  const dbAccount = get(dbAccountAtom);
-  if (isPromise<Account>(dbAccount)) {
-    set(
-      dbAccountAtom,
-      dbAccount.then((account) => saveAccount(account)),
-    );
-  } else {
-    set(dbAccountAtom, saveAccount(dbAccount));
-  }
+  const account = get(accountAtom);
+  set(dbAccountAtom, saveAccount(account));
 });
 
 export const accountNameAtom = atom(
   (get) => {
-    const dbAccount = get(dbAccountAtom);
-    if (isPromise<Account>(dbAccount)) {
-      return dbAccount.then(({ name }) => name);
-    }
-    return dbAccount.name;
+    const { name } = get(accountAtom);
+    return name;
   },
-  async (get, set, name: AccountName) => {
-    set(dbAccountAtom, {
-      ...(await get(dbAccountAtom)),
+  (get, set, name: AccountName) => {
+    set(accountAtom, {
+      ...get(accountAtom),
       name,
     });
   },
@@ -36,24 +28,32 @@ export const accountNameAtom = atom(
 
 export const accountPreferencesAtom = atom(
   (get) => {
-    const dbAccount = get(dbAccountAtom);
-    if (isPromise<Account>(dbAccount)) {
-      return dbAccount.then(({ preferences }) => preferences);
-    }
-    return dbAccount.preferences;
+    const { preferences } = get(accountAtom);
+    return preferences;
   },
-  async (get, set, preferences: AccountPreferences) => {
-    set(dbAccountAtom, {
-      ...(await get(dbAccountAtom)),
+  (get, set, preferences: AccountPreferences) => {
+    set(accountAtom, {
+      ...get(accountAtom),
       preferences,
     });
   },
 );
 
 export const timestampAtom = atom((get) => {
-  const dbAccount = get(dbAccountAtom);
-  if (isPromise<Account>(dbAccount)) {
-    return dbAccount.then(({ timestamp }) => timestamp);
-  }
-  return dbAccount.timestamp;
+  const { timestamp } = get(accountAtom);
+  return timestamp;
+});
+
+export const isDirtyAtom = unwrap(
+  atom(async (get) => !isEqual(get(accountAtom), await get(dbAccountAtom))),
+);
+
+export const reloadAtom = atom(null, (_get, set) => {
+  set(
+    dbAccountAtom,
+    fetchAccount().then((account) => {
+      set(accountAtom, account);
+      return account;
+    }),
+  );
 });
